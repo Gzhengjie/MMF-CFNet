@@ -1,0 +1,27 @@
+# configs/mmfnet.yaml
+
+paths:
+  model_dir: "./save_model/MMF-CFNet/QTPGSD"
+  dataset_dir: "./data/QTPGSD/"
+  model_name: "resnext50_32×4d_mobilenet_v4_conv_small_model.pth"
+
+training:
+  epochs: 50
+  batch_size_train: 16
+  batch_size_val: 16
+  lr: 0.0001
+  input_size: 512
+
+model:
+  n_classes: 2
+  encoder_name: "resnext50_32×4d"
+  encoder_name1: "mobilenet_v4_conv_small"
+  encoder_name2: "mobilenet_v4_conv_small"
+  encoder_name3: "mobilenet_v4_conv_small"
+  in_channels: 5
+  in_channels1: 2
+  in_channels2: 1
+  in_channels3: 3
+  encoder_depth: 5
+  fusion_form: "concat"
+  siam_encoder: false
