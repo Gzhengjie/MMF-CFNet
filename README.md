@@ -76,6 +76,8 @@ Our experiments use multi-modal data from the Tibetan Plateau:
 | Sentinel-1 GRD                   | SAR (VV, VH)                  |
 | optical-derived spectral indices | NDVI, NDSI, NDWI              |
 | Copernicus DEM                   | Elevation data                |
+
+
 All datasets used in this study were downloaded from Google Earth Engine (GEE), including Sentinel-1, Sentinel-2, Copernicus DEM, and derived spectral indices. 
 The provided scripts gee_download_sentinel-1.js, gee_download_sentinel-2.js, and gee_download_dem.js can be used to reproduce the data acquisition process.
 https://console.cloud.google.com/earth-engine
