@@ -179,3 +179,31 @@ class FWIou(base.Metric):
             threshold=self.threshold,
             ignore_channels=self.ignore_channels,
         )
+
+class BoundaryIoU(base.Metric):
+    __name__ = 'boundary_iou_score'
+
+    def __init__(
+        self,
+        eps=1e-7,
+        threshold=None,
+        activation=None,
+        ignore_channels=None,
+        n_classes=None,
+        **kwargs
+    ):
+        super().__init__(**kwargs)
+        self.eps = eps
+        self.threshold = threshold
+        self.activation = Activation(activation)
+        self.ignore_channels = ignore_channels
+        self.n_classes = n_classes
+
+    def forward(self, y_pr, y_gt):
+        y_pr = self.activation(y_pr)
+        return F.boundary_iou(
+            y_pr, y_gt,
+            eps=self.eps,
+            n_classes=self.n_classes,
+            ignore_channels=self.ignore_channels,
+        )

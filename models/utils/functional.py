@@ -1,5 +1,5 @@
 import torch
-
+import torch.nn.functional as F
 
 def _take_channels(*xs, ignore_channels=None):
     if ignore_channels is None:
@@ -243,3 +243,44 @@ def dice(pr, gt, eps=1e-7, n_classes=2, threshold=None, ignore_channels=None):
     _recall = recall(pr, gt, eps=eps, threshold=threshold, ignore_channels=ignore_channels)
     dice = 2 * _precision * _recall / (_precision + _recall)
     return dice
+
+def extract_boundary(mask, radius=1):
+    """
+    mask: (B, 1, H, W) binary mask
+    radius: boundary宽度
+    """
+    kernel = torch.ones((1, 1, 2*radius+1, 2*radius+1), device=mask.device)
+    pad = radius
+
+    # dilation
+    dilated = F.conv2d(mask, kernel, padding=pad)
+    dilated = (dilated > 0).float()
+
+    # erosion
+    eroded = F.conv2d(mask, kernel, padding=pad)
+    eroded = (eroded == kernel.numel()).float()
+
+    boundary = dilated - eroded
+    return boundary
+
+def boundary_iou(pr, gt, n_classes, device="cuda", radius=3, eps=1e-7, threshold=None, ignore_channels=None):
+    # pr = _threshold(pr, threshold=threshold)
+    pr, gt = _take_channels(pr, gt, ignore_channels=ignore_channels)
+    """
+    pr, gt: (H, W) or (B, H, W)
+    """
+    score = []
+
+    for c in range(n_classes):
+        pr_c = (pr == c).float().unsqueeze(1).to(device)
+        gt_c = (gt == c).float().unsqueeze(1).to(device)
+
+        pr_b = extract_boundary(pr_c, radius)
+        gt_b = extract_boundary(gt_c, radius)
+
+        intersection = torch.sum(pr_b * gt_b)
+        union = torch.sum(pr_b) + torch.sum(gt_b) - intersection
+
+        score.append((intersection + eps) / (union + eps))
+
+    return torch.mean(torch.stack(score))
